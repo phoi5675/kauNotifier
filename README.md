@@ -1,5 +1,6 @@
 # kauNotifier
 kau.ac.kr 의 공지사항을 매일 오후 9시에 메일로 받아볼 수 있습니다
+
 페이지 뷰 방식이 다른 과와 차이가 있는 소프트웨어 학부의 공지는 지원하지 않습니다. 추후 지원 예정
 # Requirements
 - python3 (2.7.x 에서는 unicode 오류 가능성 있음)
