@@ -35,8 +35,8 @@ def scrap(web_index, board_name, mlist):
         temp_id = temp_id[(temp_id.find('(') + 1):temp_id.find(',')]
         temp_id_res = web_index + boardId + temp_id
         # 오늘 날짜와 일치하는 경우, 리스트에 추가
-        #if temp_date == today:
-        if temp_date == '2020-03-30': # 테스트용
+        if temp_date == today:
+        #if temp_date == '2020-03-30': # 테스트용
             mlist.append(board(temp_title, temp_date, temp_id_res, board_name))
             has_noti += 1
     if has_noti > 0:
@@ -47,8 +47,12 @@ def scrap(web_index, board_name, mlist):
 boardId = "?search_boardId="
 
 # 일반, 학사공지
-GENERAL = "http://kau.ac.kr/page/kauspace/general_list.jsp"
-ACADEMIC = "http://kau.ac.kr/page/kauspace/academicinfo_list.jsp"
+GENERAL = "http://kau.ac.kr/page/kauspace/general_list.jsp" # 일반
+ACADEMIC = "http://kau.ac.kr/page/kauspace/academicinfo_list.jsp" # 학사
+SCHOLAR = "http://www.kau.ac.kr/page/kauspace/scholarship_list.jsp" # 장학 / 대출
+RESEARCH = "http://www.kau.ac.kr/page/kauspace/research_list.jsp" # 산학 / 연구
+EVENT = "http://www.kau.ac.kr/page/kauspace/event_list.jsp" # 행사
+EMPLOY = "http://www.kau.ac.kr/page/kauspace/employment_list.jsp" # 모집 / 채용
 
 # 학과공지
 MACH = "http://www.kau.ac.kr/page/web/am_engineer/notice/dept_li.jsp"  # 항우기
@@ -63,8 +67,8 @@ FREE = "http://www.kau.ac.kr/page/school/free/notice/notice_li.jsp"  # 자유
 # 소프트는 게시판 방식이 다르므로 나중에 따로 추가
 # 능력자분이 해주시겠지 뭐,,,
 # 일반 공지
-gen_noti = ["gen", "aca"]
-gen_web_arr = [GENERAL, ACADEMIC]
+gen_noti = ["gen", "aca", "sch", "res", "eve", "emp"]
+gen_web_arr = [GENERAL, ACADEMIC, SCHOLAR, RESEARCH, EVENT, EMPLOY]
 gen_noti_count = 0 # 일반 공지 전체 카운트 변수
 # 학부별 공지
 dept_noti = ["mach", "elec", "stuf", "laws", "avia", "busi", "free"]
