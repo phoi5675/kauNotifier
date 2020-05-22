@@ -2,6 +2,7 @@
 import requests
 from datetime import date
 from bs4 import BeautifulSoup
+import const
 class board():
     def __init__(self, title, date, board_id, board_name):
         self.title = title
@@ -12,6 +13,7 @@ def scrap(web_index, board_name, mlist):
     '''
     사이트에서 게시물 추출하는 부분
     '''
+    boardId = "?search_boardId="
     # request web addr and prettify html
     r = requests.get(web_index)
     res = r.text
@@ -44,105 +46,134 @@ def scrap(web_index, board_name, mlist):
     else:
         return 0
 
-boardId = "?search_boardId="
 
-# 일반, 학사공지
-GENERAL = "http://kau.ac.kr/page/kauspace/general_list.jsp" # 일반
-ACADEMIC = "http://kau.ac.kr/page/kauspace/academicinfo_list.jsp" # 학사
-SCHOLAR = "http://www.kau.ac.kr/page/kauspace/scholarship_list.jsp" # 장학 / 대출
-RESEARCH = "http://www.kau.ac.kr/page/kauspace/research_list.jsp" # 산학 / 연구
-EVENT = "http://www.kau.ac.kr/page/kauspace/event_list.jsp" # 행사
-EMPLOY = "http://www.kau.ac.kr/page/kauspace/employment_list.jsp" # 모집 / 채용
+def career_scrap(web_index, board_name, mlist):
+    # request web addr and prettify html
+    r = requests.get(web_index)
+    res = r.text
+    res.lstrip()
+    soup = BeautifulSoup(res, 'lxml')
 
-# 학과공지
-MACH = "http://www.kau.ac.kr/page/web/am_engineer/notice/dept_li.jsp"  # 항우기
-ELEC = "http://www.kau.ac.kr/page/dept/eie/board/undergraduate_notice.jsp"  # 항전정
-SOFT = "http://sw.kau.ac.kr/page_id=739"  # 소프트
-STUF = "http://www.kau.ac.kr/page/web/aviation_stuff/notice/dept_li.jsp"  # 재료
-LAWS = "http://www.kau.ac.kr/page/web/universe_law/life/notice_li.jsp"  # 교물
-AVIA = "http://www.kau.ac.kr/page/web/aviation_service/information/no_dept_li.jsp"  # 운항
-BUSI = "http://www.kau.ac.kr/page/web/business/community/news_li.jsp"  # 경영
-FREE = "http://www.kau.ac.kr/page/school/free/notice/notice_li.jsp"  # 자유
+    has_noti = 0 # 공지가 존재하는지 확인하는 변수
 
-# 소프트는 게시판 방식이 다르므로 나중에 따로 추가
-# 능력자분이 해주시겠지 뭐,,,
-# 일반 공지
-gen_noti = ["gen", "aca", "sch", "res", "eve", "emp"]
-gen_web_arr = [GENERAL, ACADEMIC, SCHOLAR, RESEARCH, EVENT, EMPLOY]
-gen_noti_count = 0 # 일반 공지 전체 카운트 변수
-# 학부별 공지
-dept_noti = ["mach", "elec", "stuf", "laws", "avia", "busi", "free"]
-dept_web_arr = [MACH, ELEC, STUF, LAWS, AVIA, BUSI, FREE]
-dept_noti_count = list(0 for i in range(len(dept_web_arr))) # 학부별 공지 카운트 변수
+    ul = soup.find("ul", class_="black")
+    li_list = ul.find_all('li') # 공지 페이지에서 공지를 리스트로 추가
 
-gen_list = list(list() for i in range(len(gen_web_arr)))
-dept_list = list(list() for i in range(len(dept_web_arr)))
+    for li in li_list:
+        # 게시물 분류 부분에서 오류가 생기지만, 태그를 제거하는 것보다 이게 위험하지만 편하니까 try except 사용
+        try:
+            # 게시물 날짜 추출
+            date_xml = li.find('time')
+            temp_date = date_xml.get_text()
+            # 게시물 링크 추출
+            temp_id = "http://career.kau.ac.kr/" + li.a.get("href")
+            # 게시물 제목 추출
+            temp_title = li.a.get_text()
+
+            # 오늘 날짜와 일치하는 경우, 리스트에 추가
+            if temp_date == today:
+            #if temp_date == '2020-03-16': # 테스트용
+                mlist.append(board(temp_title, temp_date, temp_id, board_name))
+                has_noti += 1
+        except:
+            pass
+
+    if has_noti > 0:
+        return 1
+    else:
+        return 0
 
 
-# 오늘 날짜 확인
-today = date.today().isoformat()
-file_out = []
+def add_noti(html_base, cls, noti):
+    div = html_base.find(class_=cls)
 
-# 일반공지
-for gen_web_index, gen_index, gen_list_index in zip(gen_web_arr, gen_noti, gen_list):
-    # 오늘의 학교 홈페이지 공지사항을 gen_list 에 저장
-    if scrap(gen_web_index, gen_noti, gen_list_index):
-        gen_noti_count += 1
+    # 타이틀과 링크를 추가
+    new_tag = html_base.new_tag('a', href=noti.board_id)
+    new_tag.string = noti.title
+    new_tag.append(html_base.new_tag("br"))
+    div.insert_after(new_tag)
 
-# 각 학과별 학과공지
-for dept_web_index, dept_noti_index, dept_index in zip(dept_web_arr, dept_noti, dept_list):
-    # 오늘의 학과 공지사항을 dept_list 에 저장
-    if scrap(dept_web_index, dept_noti_index, dept_index):
-        dept_noti_count[dept_web_arr.index(dept_web_index)] += 1
+# 메인함수 시작
+if __name__ == '__main__':
+    # 학부 / 학과별 공지를 저장할 배열
+    gen_list = list(list() for i in range(len(const.KAUARY)))
+    dept_list = list(list() for i in range(len(const.DEPARY)))
 
-# 파일로 내보내기
-html_text = '''
-<!DOCTYPE html>
-<html>
+    gen_noti_count = 0  # 일반 공지 전체 카운트 변수
+    dept_noti_count = list(0 for i in range(len(const.DEPARY)))  # 학부별 공지 카운트 변수
 
-<head>
-    <meta charset=\"utf-8\">
-    <title>Kau Notifier</title>
-</head>
+    # 오늘 날짜 확인
+    today = date.today().isoformat()
+    file_out = []
 
-<body>
-    <h1>항공대학교 공지사항</h1><br>
-    <h2>일반공지<br></h2>
-    <h3>학과공지<br></h3>
-    <p>구독을 중단하고 싶은 경우<br>phoiNotifier@gmail.com<br>으로 메일을 보내주시기 바랍니다.</p>
-</body>
+    # 일반공지
+    for gen_web_index, gen_index, gen_list_index in zip(const.KAUARY, const.GENFIARY, gen_list):
+        # 취업 공지의 경우, 페이지 뷰 방식이 다르므로 따로 제작
+        if gen_index == "car":
+            if career_scrap(gen_web_index, const.GENFIARY, gen_list_index):
+                gen_noti_count += 1
+        # 오늘의 학교 홈페이지 공지사항을 gen_list 에 저장
+        elif scrap(gen_web_index, const.GENFIARY, gen_list_index):
+            gen_noti_count += 1
 
-</html>'''
-for dept_index, dept_file, dept_noti_count_index in zip(dept_list, dept_noti, dept_noti_count):
-    html_base = BeautifulSoup(html_text, 'lxml')
-    br = html_base.new_tag("br")
-    # 공지를 html 에 추가하는 부분을 함수로 만들면 훨씬 코드가 깔끔하겠지만 그냥 쓰자
-    # 일반공지 먼저 추가
-    for gen_index in gen_list:
-        for i in range(0, len(gen_index)):
-            h2 = html_base.h2
+    # 각 학과별 학과공지
+    for dept_web_index, dept_noti_index, dept_index in zip(const.DEPARY, const.DEPFIARY, dept_list):
+        # 오늘의 학과 공지사항을 dept_list 에 저장
+        if scrap(dept_web_index, dept_noti_index, dept_index):
+            dept_noti_count[const.DEPARY.index(dept_web_index)] += 1
 
-            # 타이틀과 링크를 추가
-            new_tag = html_base.new_tag('a', href=gen_index[i].board_id)
-            new_tag.string = gen_index[i].title
-            new_tag.append(br)
-            h2.insert_after(new_tag)
+    # 파일로 내보내기
+    html_text = '''
+    <!DOCTYPE html>
+    <html>
+    
+    <head>
+        <meta charset=\"utf-8\">
+        <title>KAU Notifier</title>
+    </head>
+    
+    <body>
+        <h1>항공대학교 공지사항</h1><br>
+        <h2>일반공지<br></h2>
+            <div class="general"></div>
+        <h2>학과공지<br></h2>
+            <div class="dept"></div>
+        <p>구독을 중단하고 싶은 경우 phoiNotifier@gmail.com 으로 메일을 보내주시기 바랍니다</p>
+    </body>
+    
+    </html>'''
 
-    # 학과공지 추가
-    # 학과 공지 개수가 1개 이상일 수 있으므로 루프를 하나 더 생성해서, 학과 공지 "목록"을 html 에 추가
-    if dept_noti_count_index != 0:
-        for i in range(0, len(dept_index)):
-            # 학과 공지글이 없는 경우, 과정 생략
-            h3 = html_base.h3
+    # 아래는 나중에 추가 예정
+    '''
+    <p>구독을 중단하고 싶은 경우 <a href="https://forms.gle/55mSgQkuweBL8XbJ8">여기</a>에 메일을 적어주시거나
+            <br>phoiKAUNotifier@gmail.com 으로 메일을 보내주시기 바랍니다
+        </p>
+    '''
+    for dept_index, dept_file, dept_noti_count_index in zip(dept_list, const.DEPFIARY, dept_noti_count):
+        html_base = BeautifulSoup(html_text, 'lxml')
+        # 일반공지 먼저 추가
+        for gen_index in gen_list:
+            for i in range(0, len(gen_index)):
+                add_noti(html_base, "general", gen_index[i])
 
-            # 타이틀과 링크를 추가
-            new_tag = html_base.new_tag('a', href=dept_index[i].board_id)
-            new_tag.string = dept_index[i].title
-            new_tag.append(br)
-            h3.insert_after(new_tag)
-    if (dept_noti_count_index != 0) or (gen_noti_count != 0):
-        # 파일에 저장하기 / 왜 with open 은 오류가 나는건지?`
-        # 학교 / 학부 공지 중 하나 이상이 존재하는 경우에만 파일 생성
-        fi = open('./html/' + dept_file + '.html', 'w')  # 파일 오픈
-        fi.write((str)(html_base))
-        fi.close()
+        # 학과공지 추가
+        # 학과 공지 개수가 1개 이상일 수 있으므로 루프를 하나 더 생성해서, 학과 공지 "목록"을 html 에 추가
+        if dept_noti_count_index != 0:
+            for i in range(0, len(dept_index)):
+                # 학과 공지글이 없는 경우, 과정 생략
+                add_noti(html_base, "dept", dept_index[i])
+        elif dept_noti_count_index == 0:
+            # 학과 공지사항이 없는 경우, 없다는 문장 추가
+            div = html_base.find(class_="dept")
+
+            new_tag = html_base.new_tag('p')
+            new_tag.string = "오늘은 학과 공지사항이 없습니다"
+            new_tag.append(html_base.new_tag("br"))
+            div.insert_after(new_tag)
+
+        if (dept_noti_count_index != 0) or (gen_noti_count != 0):
+            # 파일에 저장하기 / 왜 with open 은 오류가 나는건지?`
+            # 학교 / 학부 공지 중 하나 이상이 존재하는 경우에만 파일 생성
+            fi = open(const.FILEPATH + 'html/' + dept_file + '.html', 'w')  # 파일 오픈
+            fi.write(str(html_base))
+            fi.close()
