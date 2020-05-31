@@ -67,7 +67,7 @@ SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 465
 # 보내는 메일 계정
 SMTP_USER = "username@gmail.com"
-SMTP_PASSWORD = "userpasswd"
+SMTP_PASSWORD = "userpwd"
 
 # smtp로 접속할 서버 정보를 가진 클래스변수 생성
 smtp = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT)
@@ -105,6 +105,9 @@ worksheet = doc.worksheet('설문지 응답 시트1')
 cell_data = worksheet.acell('B2').value
 i = 2 # 셀의 데이터는 2행부터 시작
 while worksheet.acell('A' + (str)(i)).value != '':
+    # 구독 취소 한 사람의 경우 루프 넘김
+    if worksheet.acell('d' + (str)(i)).value == 'O':
+        continue
     addr = worksheet.acell('b' + (str)(i)).value # 메일 주소
     maj = worksheet.acell('c' + (str)(i)).value # 전공 분류
     index = dept_noti_kor.index(maj)

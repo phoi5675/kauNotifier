@@ -46,7 +46,7 @@ def scrap(web_index, board_name, mlist):
     else:
         return 0
 
-
+# 취업공지 스크랩
 def career_scrap(web_index, board_name, mlist):
     # request web addr and prettify html
     r = requests.get(web_index)
@@ -138,14 +138,19 @@ if __name__ == '__main__':
             <div class="general"></div>
         <h2>학과공지<br></h2>
             <div class="dept"></div>
-        <p>구독을 중단하고 싶은 경우 phoiNotifier@gmail.com 으로 메일을 보내주시기 바랍니다</p>
+        <p>다른 학우분들도 메일을 받아 볼 수 있게 해주세요! 신청은 <a href="https://forms.gle/WwL3GB57zbRq5PWG6">여기</a> 에서 할 수 있습니다<br>
+            <br>구독을 중단하고 싶은 경우 phoiNotifier@gmail.com 으로 메일을 보내주시기 바랍니다
+            <br>구독을 중단하고 싶은 경우 <a href="https://forms.gle/eHxyqZTD1HNA3u9SA">여기</a>에 메일을 적어주시거나
+            <br>phoiKAUNotifier@gmail.com 으로 메일을 보내주시기 바랍니다
+        </p>
+
     </body>
     
     </html>'''
 
     # 아래는 나중에 추가 예정
     '''
-    <p>구독을 중단하고 싶은 경우 <a href="https://forms.gle/55mSgQkuweBL8XbJ8">여기</a>에 메일을 적어주시거나
+    <p>구독을 중단하고 싶은 경우 <a href="https://forms.gle/eHxyqZTD1HNA3u9SA">여기</a>에 메일을 적어주시거나
             <br>phoiKAUNotifier@gmail.com 으로 메일을 보내주시기 바랍니다
         </p>
     '''
