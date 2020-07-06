@@ -96,7 +96,7 @@ def htmlToFile(html, filename):
 
 
 def isBodyTagContainsElements(html):
-    if html.body.contents is not None:
+    if len(html.body) is not 0:
         return True
     else:
         return False
