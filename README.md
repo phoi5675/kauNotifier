@@ -1,5 +1,6 @@
 # Deprecated
 통합 공지 프로그램 "univNotifier" 로 병합되었습니다.
+
 https://github.com/phoi5675/univNotifier
 
 # kauNotifier
