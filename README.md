@@ -1,5 +1,6 @@
 # Deprecated
 통합 공지 프로그램 "univNotifier" 로 병합되었습니다.
+https://github.com/phoi5675/univNotifier
 
 # kauNotifier
 kau.ac.kr 의 공지사항을 매일 오후 9시에 메일로 받아볼 수 있습니다
